@@ -11,7 +11,7 @@ namespace io
 
         /* In */
 
-    template<typename type, typename char_type> [[nodiscard]] constexpr type input(std::basic_istream<char_type>& in = std::cin) noexcept
+    template<typename type, typename char_type > [[nodiscard]] constexpr type input(std::basic_istream<char_type>& in = std::cin) noexcept
     {
         std::basic_stringstream<char_type> temp_ss;
         {

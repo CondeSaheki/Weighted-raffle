@@ -105,7 +105,7 @@ namespace saheki::file
 
         const string_type separator = ",";
         const string_type separator2 = "|";
-        const auto endl = '\n';
+        const char_type endl = '\n';
 
         // get file    
         string_type file = io::inputf<char_type>(path_file);
@@ -156,7 +156,7 @@ namespace saheki::file
         using string_type = std::basic_string<char_type>;
 
         const string_type separator = ",";
-        const auto endl = '\n';
+        const char_type endl = '\n';
 
         // get file    
         string_type file = io::inputf<char_type>(path_file);
