@@ -6,9 +6,9 @@
 #include <memory>
 #include <math.h>
 
-#include "file.h"
-
 // static fns
+
+static inline const long double e_const = 2.718281828459045235360287471352662498L;
 
 template<typename type> static constexpr type sarandom(const type max, const type min) noexcept
 {
@@ -17,8 +17,9 @@ template<typename type> static constexpr type sarandom(const type max, const typ
 
 template<typename from, typename to> static constexpr auto round_near(const from& value) noexcept
 {
+/*
     auto casted = static_cast<to>(value);
-    from decimals();
+    from decimals(0);
     if(casted >= 0)
     {
         decimals = value - casted;
@@ -38,8 +39,7 @@ template<typename from, typename to> static constexpr auto round_near(const from
         b;
     }
     
-
-
+*/
 }
 
 
@@ -72,17 +72,12 @@ namespace saheki::sort
             const uint32_t& _max_partipants,
             std::vector<std::basic_string<elem>>& _partipants,
             const size_t& _position)
-            : name(_name), 
-            supervisor(_supervisor), 
-            max_partipants(_max_partipants), 
+            : name(_name),
+            supervisor(_supervisor),
+            max_partipants(_max_partipants),
             partipants(_partipants), 
-            position(_position) {} 
+            position(_position) {}
     };
-
-    auto optionf(std::filesystem::path path_file)
-    {
-        return saheki::file::options_file(path_file);
-    }
 
     // NOME,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
     template<typename _elem = char > class partipant
@@ -97,11 +92,6 @@ namespace saheki::sort
         constexpr partipant(const std::basic_string<elem>& _name, std::vector<uint32_t>& _preferences) : name(_name), preferences(_preferences) {}
     };
 
-    auto partipantf(std::filesystem::path path_file)
-    {
-        return saheki::file::forms_file(path_file);
-    }
-
     template<typename _elem = char > class interval
     {
     public: // types
@@ -112,15 +102,14 @@ namespace saheki::sort
         uint32_t end;
     public: // construcotors
         constexpr interval() : owner(), begin(uint32_t()), end(uint32_t()) {}
-        constexpr interval(std::unique_ptr<partipant<elem>>& owner, const uint32_t& _begin, const uint32_t& _end) : owner(_owner), begin(_begin), end(_end) {}
+        constexpr interval(std::unique_ptr<partipant<elem>>& _owner, const uint32_t& _begin, const uint32_t& _end) : owner(_owner), begin(_begin), end(_end) {}
     };
 
         // fns
 
     void sort(std::vector<std::unique_ptr<sort::option<char>>>& options_references, std::vector<std::unique_ptr<sort::partipant<char>>>& partipants_references)
     {
-
-        const auto e_const = std::numbers::e_v<long double>;
+    /*
         using char_type = char;
         using string_type = std::basic_string<char_type>;
 
@@ -134,7 +123,7 @@ namespace saheki::sort
         }
 
         // auto sort = powl(e_const, 16 -x );
-
+    */
     }
 
 }

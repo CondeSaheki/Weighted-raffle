@@ -1,4 +1,7 @@
+#include <iostream>
 #include "sort.h"
+#include "file.h"
+
 
 int main(int argc, char **argv)
 {
@@ -7,6 +10,7 @@ int main(int argc, char **argv)
     using string_type = std::basic_string<char_type>;
     using namespace saheki;
 
+    // cli args
     /*
         // more or less args than needed
         if(argc != 2) 
@@ -20,12 +24,15 @@ int main(int argc, char **argv)
     */
 
 
-    auto options = sort::options_file("asdasds");
-    auto participants = sort::forms_file("asdasds");
-    
+    auto options = file::options_file("options.csv");
+    auto participants = file::forms_file("forms.csv");
+
+    /*    
     // create references
     std::vector<std::unique_ptr<sort::option<char_type>>> options_references;
     std::vector<std::unique_ptr<sort::partipant<char_type>>> partipants_references;
+
+
 
     for(auto it = options.begin();it != options.end(); ++it)
     {
@@ -41,4 +48,6 @@ int main(int argc, char **argv)
     {
         sort::sort(options_references,partipants_references);
     }
+
+    */
 }

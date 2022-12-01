@@ -14,7 +14,7 @@ static auto split_lines(const std::basic_string<_elem>& str, const _elem& endl) 
 {
     std::vector<std::basic_string<_elem>> lines;
     {
-        string_type::iterator pos = str.begin();
+        auto pos = str.begin(); // typename std::basic_string<_elem>::iterator
         for(auto it = str.begin(); it != str.end(); ++it)
         {
             if(*it == endl)
@@ -32,6 +32,10 @@ template<typename _type = std::string >
 static std::vector<_type> split(const _type& str, const _type& str2, typename _type::const_iterator start_position) noexcept
 {
     std::vector<_type> splited;
+    if(str.empty() || str2.empty() || start_position == str.end())
+    {
+        return splited;
+    }
 
     bool found = false;
     auto last_last = str.begin();
@@ -49,7 +53,7 @@ static std::vector<_type> split(const _type& str, const _type& str2, typename _t
             }
             else
             {
-                splited.emplace_back(last_last, first_found);
+                splited.emplace_back(last_last, it1);
                 last_last = it1 +1;
                 found = false;
                 ++it1;
@@ -85,9 +89,7 @@ static std::vector<_type> split(const _type& str, const _type& str2, typename _t
             break;
         }
     }
-
     splited.emplace_back(_type(last_last, str.end()));
-
     return splited;
 }
 
@@ -102,6 +104,7 @@ namespace saheki::file
         using string_type = std::basic_string<char_type>;
 
         const string_type separator = ",";
+        const string_type separator2 = "|";
         const auto endl = '\n';
 
         // get file    
@@ -117,21 +120,30 @@ namespace saheki::file
         
         std::basic_stringstream<char_type> ss;
         int temp;
+        std::vector<string_type> temp_participants_vec;
 
         for(auto it = lines.begin(); it != lines.end(); ++it)
         {
             splitted = split((*it), separator, (*it).begin());
+            if(splitted.size() != 4)
+            {
+                std::cout << "<ERROR | bad formating in file " << path_file << ">\n";
+                exit(1);
+            }
+
+            temp_participants_vec =  split(splitted[3], separator2, (splitted[3]).begin());
 
             //convert args
             ss << splitted[2];
             ss >> temp;
 
-            options.emplace_back(splitted[0],splitted[1],temp ,splitted[3], distance(it, lines.begin()));
+            options.emplace_back(splitted[0],splitted[1],temp ,temp_participants_vec, distance(it, lines.begin()));
             
             ss.clear();
             ss.str(string_type());
             temp = 0;
             splitted.clear();
+            temp_participants_vec.clear();
         }
         lines.clear();
         return options;
@@ -152,7 +164,7 @@ namespace saheki::file
         // split lines
         auto lines = split_lines(file, endl);
         file.clear();
-
+        
         // parsing
         std::vector<string_type> splitted;
         std::vector<saheki::sort::partipant<char_type>> partipants;
@@ -165,10 +177,14 @@ namespace saheki::file
 
         for(auto it = lines.begin(); it != lines.end(); ++it)
         {
-            splitted = split((*it), separator, (*it).begin());
-
-            //convert args
             
+            splitted = split((*it), separator, (*it).begin());
+            if(splitted.size() != 17)
+            {
+                std::cout << "<ERROR | bad formating in file " << path_file << ">\n";
+                exit(1);
+            }
+            //convert args
             for(auto a = splitted.begin() + 1; a != splitted.end(); ++a)
             {
                 ss << *a;
