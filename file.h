@@ -98,7 +98,7 @@ namespace saheki::file
     namespace sfs = std::filesystem;
 
     // nome,supervisor,max_partipants,partipants
-    auto options_file(sfs::path path_file)
+    auto options_file(sfs::path& path_file)
     {
         using char_type = char;
         using string_type = std::basic_string<char_type>;
@@ -137,7 +137,7 @@ namespace saheki::file
             ss << splitted[2];
             ss >> temp;
 
-            options.emplace_back(splitted[0],splitted[1],temp ,temp_participants_vec, distance(it, lines.begin()));
+            options.emplace_back(splitted[0],splitted[1],temp ,temp_participants_vec, distance(lines.begin(),it));
             
             ss.clear();
             ss.str(string_type());
@@ -150,7 +150,7 @@ namespace saheki::file
     }
 
     // NOME,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
-    auto forms_file(sfs::path path_file)
+    auto forms_file(sfs::path& path_file)
     {
         using char_type = char;
         using string_type = std::basic_string<char_type>;
@@ -199,6 +199,7 @@ namespace saheki::file
             
             partipants.emplace_back(splitted[0], preferences);
             
+            preferences.clear();
             splitted.clear();
         }
         lines.clear();

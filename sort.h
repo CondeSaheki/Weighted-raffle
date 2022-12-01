@@ -7,6 +7,8 @@
 #include <chrono>
 #include <thread>
 #include <math.h>
+#include <algorithm>
+#include "io.h"
 
 // static fns
 
@@ -17,31 +19,28 @@ template<typename type> static constexpr type sarandom(const type max, const typ
     return 0;
 }
 
-template<typename from, typename to> static constexpr auto round_near(const from& value) noexcept
+template< size_t num_decimals, typename from > static constexpr from round_near(const from& value) noexcept
 {
-/*
-    auto casted = static_cast<to>(value);
+    auto copy = value * powl(10, num_decimals);
+    auto casted = static_cast<size_t>(copy);
     from decimals(0);
-    if(casted >= 0)
+    if(value >= 0)
     {
-        decimals = value - casted;
+        decimals = copy - casted;
+        if(decimals >= 0.5)
+        {
+            casted = casted + 1;
+        }
     }
     else
     {
-        decimals = value + casted;
+        decimals = casted - copy;
+        if(decimals <= 0.5)
+        {
+            casted = casted + 1;
+        }
     }
-    
-
-    if(decimals > 0.5)
-    {
-        return b + to(1);
-    }
-    else
-    {
-        b;
-    }
-    
-*/
+    return static_cast<from>(casted) / powl(10, num_decimals);
 }
 
 namespace saheki::sort
@@ -102,7 +101,7 @@ namespace saheki::sort
         uint32_t end;
         uint32_t power;
     public: // construcotors
-        constexpr interval() : owner(), begin(uint32_t()), end(uint32_t()), power(uint32_t()) {}
+        constexpr interval() : owner(nullptr), begin(uint32_t()), end(uint32_t()), power(uint32_t()) {}
         constexpr interval(partipant<elem>* _owner, const uint32_t& _begin, const uint32_t& _end, const uint32_t& _power) : owner(_owner), begin(_begin), end(_end), power(_power) {}
     };
 
@@ -113,51 +112,91 @@ using _elem = char;
         using char_type = char;
         using string_type = std::basic_string<char_type>;
         
-
-
+        // suspense
+        std::cout << "Are you ready ?\n"; 
+        while((io::input<string_type, char_type>() != "yes"))
+        {
+            std::cout << "Are you ready ?\n"; 
+        }
+        
         // ramdomize music
         auto random_option = options_ptrs.at(sarandom<int>(0, options_ptrs.size()));
 
+        //
+
         //display random music info
+        
+        std::cout << "randomized option: \n\n";
         std::cout << "name: " << (*random_option).name << "\n" ;
         std::cout << "slots: " << (*random_option).max_partipants << "\n" ;
         std::cout << "supervisor: " << (*random_option).supervisor << "\n";
         std::cout << "participants: ";
+        
         for(auto it = ((*random_option).partipants).begin(); it != ((*random_option).partipants).end(); ++it)    
         {
-            std::cout << *it << " " ;
+            std::cout << *it << " ";
         }
-        std::cout << " \n" ;
+
+        std::cout << "\n--------------------------------------------\n\n";
+        
 
         // generate intervals for participants
         std::vector<interval<char_type>> intervals;
 
         uint32_t max_number = 0;
+        uint32_t s;
+
+        std::cout  << "\n\n\n" << ((*random_option).position) << "\n\n\n";
 
         for(auto it = partipants_ptrs.begin(); it != partipants_ptrs.end(); ++it)
         {
-            auto sort = powl(e_const, 16 -(*(*it)).preferences.at((*random_option).position) ); // need round closer 
+            s = round_near<0>(powl(e_const, 16 - ((*(*it)).preferences)[((*random_option).position)])); // need round closer 
+            std::cout << "<" << s << ">\n";
             if(intervals.empty())
             {
-                intervals.emplace_back(*(*it), 0, sort, sort);
+                auto temp = 0;
+                intervals.emplace_back((*it), temp, s, s);
             }
             else
             {
-                intervals.emplace_back(*(*it), (*(intervals.end() -1)).begin + 1, (*(intervals.end() -1)).begin + 1 + sort, sort);
+                intervals.emplace_back((*it), (*(intervals.end() -1)).end + 1, (*(intervals.end() -1)).end + 1 + s, s);
             }
+
+            s = 0;
         }
         
         // random
         max_number = (*(intervals.end() -1)).end;
+
+        std::cout << "<max num|" << max_number << ">\n";
+
         auto random_num = sarandom<int>(0, max_number);
         
+
+        //sort intervals by power
+        std::sort(intervals.begin(), intervals.end(), 
+            [](const interval<char_type>& a, const interval<char_type>& b) {
+                return a.power > b.power;
+            });
+
+
         // find lucky number interval and calculate chances
         partipant<_elem>* winner;
         for(auto it = intervals.begin(); it != intervals.end(); ++it)
         {
-            long double chance_for_participant = (     (static_cast<long double>((*it).power * 100000) / max_number)) / 1000; // need round closer 
+            long double chance_for_participant = static_cast<long double>((*it).power * 100) / max_number; // need round closer 
+            chance_for_participant = round_near<3>(chance_for_participant);
+
+            if( 0.001 > chance_for_participant )
+            {
+                std::cout << "participant: " << (*((*it).owner)).name << "'s chance: " << " less than 0.001" <<  "%\n";    
+            }
+            else
+            {
+                std::cout << "participant: " << (*((*it).owner)).name << "'s chance: " << chance_for_participant <<  "%\n";
+            }
+
             
-            std::cout << "participant: " << (*((*it).owner)).name << "chance: " << chance_for_participant << "\n";
 
             if((*it).begin <= random_num && (*it).end >= random_num)
             {
@@ -165,11 +204,20 @@ using _elem = char;
             }
         }
 
-        // suspense 3seg
-        std::this_thread::sleep_for (std::chrono::seconds(3));
+        
 
 
-        std::cout << "congratulations participant: " << (*winner).name << "\n";
+        std::cout << " \n\n";
+
+        // suspense
+        std::cout << "Are you ready ?\n"; 
+        while((io::input<string_type, char_type>() != "yes"))
+        {
+            std::cout << "Are you ready ?\n"; 
+        }
+
+
+        std::cout << "\ncongratulations participant: " << (*winner).name << "\n";
 
         // check if participant is ok
 
@@ -178,13 +226,15 @@ using _elem = char;
             // assing participant to option
             ((*random_option).partipants).emplace_back((*winner).name);
             
+
             // remove option if full
-            if( ((*random_option).partipants).size() <= ((*random_option).max_partipants))
+            if( ((*random_option).partipants).size() >= ((*random_option).max_partipants))
             {
                 for(auto it = options_ptrs.begin(); it != options_ptrs.end(); ++it)
                 {
                     if((*random_option).position == ((*(*it)).position))
                     {
+                        std::cout << "<removed option>\n";
                         options_ptrs.erase(it);
                         break;
                     }
@@ -196,6 +246,7 @@ using _elem = char;
             {
                 if((*(*it)).name == (*winner).name)
                 {
+                    std::cout << "<removed participant>\n";
                     partipants_ptrs.erase(it);
                     break;
                 }
