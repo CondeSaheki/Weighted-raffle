@@ -24,11 +24,12 @@ int main(int argc, char **argv)
         auto path2 = argv[2];
     */
 
+    // file paths
     sfs::path options_file_path("options.csv");
     sfs::path forms_file_path("forms.csv");
     sfs::path output_file_path("output.csv");
-
-
+    
+    // open and parse files
     auto options = file::options_file(options_file_path);
     auto participants = file::forms_file(forms_file_path);
 
@@ -36,9 +37,6 @@ int main(int argc, char **argv)
     // create references
     std::vector<sort::option<char_type>*> options_ptrs;
     std::vector<sort::partipant<char_type>*> partipants_ptrs;
-
-
-
     for(auto it = options.begin();it != options.end(); ++it)
     {
         options_ptrs.emplace_back(&(*it));
@@ -71,30 +69,15 @@ int main(int argc, char **argv)
             break;
         }
 
-        // print all options
-        std::cout << "all options:\n\n";
-        for(auto it = options.begin();it != options.end(); ++it)
-        {
-            std::cout << "name: " << (*it).name << "\n";
-            std::cout << "slots: " << (*it).max_partipants << "\n";
-            std::cout << "supervisor: " << (*it).supervisor << "\n";
-            std::cout << "participants: ";
-            for(auto it2 = ((*it).partipants).begin(); it2 != ((*it).partipants).end(); ++it2)    
-            {
-                std::cout << *it2 << " + ";
-            }
-            std::cout << " \n\n";
-        }
+        // print all options and print all avaliable participants
         std::cout << "--------------------------------------------\n";
+        std::cout << "all options:\n";
+        sort::print_option(options);
 
-        // print all avaliable participants
-        std::cout << "avaliable participants:\n\n";
-        for(auto it = partipants_ptrs.begin();it != partipants_ptrs.end(); ++it)
-        {
-            std::cout << "name: " << (*(*it)).name << "\n";
-        }
-        std::cout << " \n\n";
-        
+        std::cout << "--------------------------------------------\n";
+        std::cout << "all avaliable participants:\n";
+        sort::print_participant(participants);
+
         sort::sort(options_ptrs, partipants_ptrs);
     }
     

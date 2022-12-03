@@ -9,15 +9,11 @@
 #include <math.h>
 #include <algorithm>
 #include "io.h"
+#include "random.h"
 
 // static fns
 
 static inline const long double e_const = 2.718281828459045235360287471352662498L;
-
-template<typename type> static constexpr type sarandom(const type max, const type min) noexcept
-{
-    return 0;
-}
 
 template< size_t num_decimals, typename from > static constexpr from round_near(const from& value) noexcept
 {
@@ -100,133 +96,224 @@ namespace saheki::sort
         uint32_t begin;
         uint32_t end;
         uint32_t power;
+        long double chance;
     public: // construcotors
-        constexpr interval() : owner(nullptr), begin(uint32_t()), end(uint32_t()), power(uint32_t()) {}
-        constexpr interval(partipant<elem>* _owner, const uint32_t& _begin, const uint32_t& _end, const uint32_t& _power) : owner(_owner), begin(_begin), end(_end), power(_power) {}
+        constexpr interval() : owner(nullptr), begin(uint32_t()), end(uint32_t()), power(uint32_t()), chance(0.0) {}
+        constexpr interval(partipant<elem>* _owner, const uint32_t& _begin, const uint32_t& _end, const uint32_t& _power) : owner(_owner), begin(_begin), end(_end), power(_power), chance(0.0) {}
     };
 
+
+    bool question()
+    {
+        #if 0
+            using char_type = char;
+            std::cout << "--------------------------------------------\n";
+            while(true)
+            {
+                std::cout << "Are you ready ?\n"; 
+                if(io::input<std::basic_string<char_type>, char_type>() == "yes") { break; }
+            }
+            #if 0
+            system("clear");
+            #endif
+        #endif
+        return true;
+    }
+    
+    bool question2()
+    {
+        #if 0
+            using char_type = char;
+            std::cout << "--------------------------------------------\n";
+            while(true)
+            {
+                std::cout << "Are you ready ?\n"; 
+                if(io::input<std::basic_string<char_type>, char_type>() == "yes") { break; }
+            }
+            //system("clear");
+        #endif
+        return true;
+    }
+    
+    //print options
+    template<typename _elem> void print_option(const option<_elem>& target)
+    {
+        std::cout << target.name << " | " << target.supervisor;
+        if(!((target.partipants).empty()))
+        {
+            std::cout << " with ";
+        }
+        for(auto it = (target.partipants).begin(); it != (target.partipants).end(); ++it)
+        {
+            std::cout << *it;
+            if(it + 1 != (target.partipants).end())
+            {
+                std::cout << " + ";
+            }
+        }
+        //std::cout << "\n";
+    }
+    template<typename _elem> void print_option(const std::vector<option<_elem>>& target)
+    {
+        for(auto it = target.begin(); it != target.end(); ++it)
+        {
+            print_option<_elem>(*it);
+            std::cout << std::endl;
+        }
+    }
+    template<typename _elem> void print_option(const std::vector<option<_elem>*>& target)
+    {
+        for(auto it = target.begin(); it != target.end(); ++it)
+        {
+            print_option<_elem>(**it);
+            std::cout << std::endl;
+        }
+    }
+
+    //print participants
+    template<typename _elem> void print_participant(const partipant<_elem>& target)
+    {
+        std::cout << target.name;
+        /*
+        for(auto it = (target.preferences).begin(); it != (target.preferences).end(); ++it)
+        {
+            std::cout << (*it) << std::endl;
+        }
+        */
+    }
+    template<typename _elem> void print_participant(const std::vector<partipant<_elem>>& target)
+    {
+        for(auto it = target.begin(); it != target.end() - 1; ++it)
+        {
+            print_participant<_elem>(*it);
+            std::cout << ", ";
+        }
+        print_participant<_elem>(*(target.end() - 1));
+        std::cout << std::endl;
+    }
+    template<typename _elem> void print_participant(const std::vector<partipant<_elem>*>& target)
+    {
+        for(auto it = target.begin(); it != target.end() - 1; ++it)
+        {
+            print_participant<_elem>(**it);
+            std::cout << ", ";
+        }
+        print_participant<_elem>(**(target.end() - 1));
+        std::cout << std::endl;
+    }
+
+    // print intervals
+    template<typename _elem> void print_interval(const interval<_elem>& target)
+    {
+        print_participant(*(target.owner));
+        
+       if( 0.001 > target.chance)
+        {
+            std::cout << " | lesser 0.001%\n";
+        }
+        else
+        {
+            std::cout << " | " << target.chance << "%\n";
+        }
+    }
+    template<typename _elem> void print_interval(const std::vector<interval<_elem>>& target)
+    {
+        for(auto it = target.begin(); it != target.end(); ++it)
+        {
+            print_interval<_elem>(*it);
+        }
+    }
+    template<typename _elem> void print_interval(const std::vector<interval<_elem>*>& target)
+    {
+        for(auto it = target.begin(); it != target.end(); ++it)
+        {
+            print_interval<_elem>(**it);
+        }
+    }
+
         // fns
-using _elem = char;
-    void sort(std::vector<option<_elem>*>& options_ptrs, std::vector<partipant<_elem>*>& partipants_ptrs)
+    
+    template<typename _elem = char > void sort(std::vector<option<_elem>*>& options_ptrs, std::vector<partipant<_elem>*>& partipants_ptrs)
     {
         using char_type = char;
         using string_type = std::basic_string<char_type>;
         
         // suspense
-        std::cout << "Are you ready ?\n"; 
-        while((io::input<string_type, char_type>() != "yes"))
-        {
-            std::cout << "Are you ready ?\n"; 
-        }
-        
-        // ramdomize music
-        auto random_option = options_ptrs.at(sarandom<int>(0, options_ptrs.size()));
+        question();
 
-        //
+        // ramdomize music
+        auto random_option = options_ptrs.at(saheki::random_generator::number(options_ptrs.size()));
 
         //display random music info
-        
-        std::cout << "randomized option: \n\n";
-        std::cout << "name: " << (*random_option).name << "\n" ;
-        std::cout << "slots: " << (*random_option).max_partipants << "\n" ;
-        std::cout << "supervisor: " << (*random_option).supervisor << "\n";
-        std::cout << "participants: ";
-        
-        for(auto it = ((*random_option).partipants).begin(); it != ((*random_option).partipants).end(); ++it)    
-        {
-            std::cout << *it << " ";
-        }
-
-        std::cout << "\n--------------------------------------------\n\n";
-        
+        std::cout << "--------------------------------------------\n";
+        std::cout << "random music:\n";
+        print_option<char_type>((*random_option));
+        std::cout << std::endl;
 
         // generate intervals for participants
         std::vector<interval<char_type>> intervals;
-
-        uint32_t max_number = 0;
-        uint32_t s;
-
-        std::cout  << "\n\n\n" << ((*random_option).position) << "\n\n\n";
-
-        for(auto it = partipants_ptrs.begin(); it != partipants_ptrs.end(); ++it)
         {
-            s = round_near<0>(powl(e_const, 16 - ((*(*it)).preferences)[((*random_option).position)])); // need round closer 
-            std::cout << "<" << s << ">\n";
-            if(intervals.empty())
+            uint32_t s;
+            auto temp = 0;
+            for(auto it = partipants_ptrs.begin(); it != partipants_ptrs.end(); ++it)
             {
-                auto temp = 0;
-                intervals.emplace_back((*it), temp, s, s);
-            }
-            else
-            {
-                intervals.emplace_back((*it), (*(intervals.end() -1)).end + 1, (*(intervals.end() -1)).end + 1 + s, s);
-            }
+                s = round_near<0>(powl(e_const, 16 - ((*(*it)).preferences)[((*random_option).position)])); // need round closer 
+                if(intervals.empty())
+                {
+                    
+                    intervals.emplace_back((*it), temp, s, s);
+                }
+                else
+                {
+                    intervals.emplace_back((*it), (*(intervals.end() -1)).end + 1, (*(intervals.end() -1)).end + 1 + s, s);
+                }
 
-            s = 0;
+                s = 0;
+            }
         }
+
+        //get max number
+        uint32_t max_number = (*(intervals.end() -1)).end;
         
-        // random
-        max_number = (*(intervals.end() -1)).end;
-
-        std::cout << "<max num|" << max_number << ">\n";
-
-        auto random_num = sarandom<int>(0, max_number);
-        
-
         //sort intervals by power
         std::sort(intervals.begin(), intervals.end(), 
             [](const interval<char_type>& a, const interval<char_type>& b) {
                 return a.power > b.power;
             });
 
+        // random    
+        auto random_num = saheki::random_generator::number(max_number);
 
         // find lucky number interval and calculate chances
-        partipant<_elem>* winner;
+        auto winer_interval = intervals.end();
         for(auto it = intervals.begin(); it != intervals.end(); ++it)
         {
-            long double chance_for_participant = static_cast<long double>((*it).power * 100) / max_number; // need round closer 
-            chance_for_participant = round_near<3>(chance_for_participant);
-
-            if( 0.001 > chance_for_participant )
-            {
-                std::cout << "participant: " << (*((*it).owner)).name << "'s chance: " << " less than 0.001" <<  "%\n";    
-            }
-            else
-            {
-                std::cout << "participant: " << (*((*it).owner)).name << "'s chance: " << chance_for_participant <<  "%\n";
-            }
-
-            
-
+            (*it).chance = round_near<3>((static_cast<long double>((*it).power * 100) / max_number));
             if((*it).begin <= random_num && (*it).end >= random_num)
             {
-                winner = (*it).owner;
+                winer_interval = it;
             }
         }
-
         
-
-
-        std::cout << " \n\n";
+        //print all participants interval and chances
+        std::cout << "--------------------------------------------\n";
+        std::cout << "All participant chances: \n";
+        print_interval(intervals);
 
         // suspense
-        std::cout << "Are you ready ?\n"; 
-        while((io::input<string_type, char_type>() != "yes"))
-        {
-            std::cout << "Are you ready ?\n"; 
-        }
+        question2();
 
-
-        std::cout << "\ncongratulations participant: " << (*winner).name << "\n";
-
-        // check if participant is ok
-
+        // print winner
+        std::cout << "--------------------------------------------\n";
+        std::cout << "Congratulations!!!\n";
+        print_interval(*winer_interval);
+        
+        // maybe check if participant is ok 
         if(true) // io::input<char_type, char_type>() == "yes"
         {
             // assing participant to option
-            ((*random_option).partipants).emplace_back((*winner).name);
+            ((*random_option).partipants).emplace_back((*((*winer_interval).owner)).name);
             
-
             // remove option if full
             if( ((*random_option).partipants).size() >= ((*random_option).max_partipants))
             {
@@ -234,7 +321,6 @@ using _elem = char;
                 {
                     if((*random_option).position == ((*(*it)).position))
                     {
-                        std::cout << "<removed option>\n";
                         options_ptrs.erase(it);
                         break;
                     }
@@ -244,15 +330,17 @@ using _elem = char;
             // remove participant from participant list
             for(auto it = partipants_ptrs.begin(); it != partipants_ptrs.end(); ++it)
             {
-                if((*(*it)).name == (*winner).name)
+                if((*(*it)).name == (*((*winer_interval).owner)).name)
                 {
-                    std::cout << "<removed participant>\n";
                     partipants_ptrs.erase(it);
                     break;
                 }
             }
         }
-        
+
+        // suspense
+        question();
+
     }
 
 }
