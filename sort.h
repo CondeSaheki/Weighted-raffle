@@ -7,7 +7,7 @@
 #include "random.h"
 #include "math_utils.h"
 
-#define MAKE_QUESTIONS 1
+#define MAKE_QUESTIONS 0
 #define QUESTIONS_CLEAR 1
 #define RE_ROLL 0
 
@@ -25,20 +25,20 @@ namespace saheki::sort
     public: // data
         const std::basic_string<elem> name;
         const std::basic_string<elem> supervisor;
-        const uint32_t max_partipants;
+        const uint64_t max_partipants;
         std::vector<std::basic_string<elem>> partipants;
         const size_t position;
     public: // constructors
         constexpr option() 
             : name(std::basic_string<elem>()), 
             supervisor(std::basic_string<elem>()), 
-            max_partipants(uint32_t()), 
+            max_partipants(uint64_t()), 
             partipants(std::vector<std::basic_string<elem>>()), 
             position(size_t()) {}
         constexpr option(
             const std::basic_string<elem>& _name,
             const std::basic_string<elem>& _supervisor,
-            const uint32_t& _max_partipants,
+            const uint64_t& _max_partipants,
             std::vector<std::basic_string<elem>>& _partipants,
             const size_t& _position)
             : name(_name),
@@ -55,10 +55,10 @@ namespace saheki::sort
         using elem = _elem;
     public: // data
         const std::basic_string<elem> name;
-        std::vector<uint32_t> preferences;
+        std::vector<uint64_t> preferences;
     public:
-        constexpr partipant() : name(std::basic_string<elem>()), preferences(std::vector<uint32_t>()) {}
-        constexpr partipant(const std::basic_string<elem>& _name, std::vector<uint32_t>& _preferences) : name(_name), preferences(_preferences) {}
+        constexpr partipant() : name(std::basic_string<elem>()), preferences(std::vector<uint64_t>()) {}
+        constexpr partipant(const std::basic_string<elem>& _name, std::vector<uint64_t>& _preferences) : name(_name), preferences(_preferences) {}
     };
 
     template<typename _elem = char > class interval
@@ -67,13 +67,13 @@ namespace saheki::sort
         using elem = _elem;
     public: // data
         partipant<elem>* owner;
-        uint32_t begin;
-        uint32_t end;
-        uint32_t power;
+        uint64_t begin;
+        uint64_t end;
+        uint64_t power;
         long double chance;
     public: // construcotors
-        constexpr interval() : owner(nullptr), begin(uint32_t()), end(uint32_t()), power(uint32_t()), chance(0.0) {}
-        constexpr interval(partipant<elem>* _owner, const uint32_t& _begin, const uint32_t& _end, const uint32_t& _power) : owner(_owner), begin(_begin), end(_end), power(_power), chance(0.0) {}
+        constexpr interval() : owner(nullptr), begin(uint64_t()), end(uint64_t()), power(uint64_t()), chance(0.0) {}
+        constexpr interval(partipant<elem>* _owner, const uint64_t& _begin, const uint64_t& _end, const uint64_t& _power) : owner(_owner), begin(_begin), end(_end), power(_power), chance(0.0) {}
     };
     
         // fns
@@ -190,7 +190,7 @@ namespace saheki::sort
         print_participant(*(target.owner));
         if( 0.001 > target.chance)
         {
-            std::cout << " | lesser 0.001%\n";
+            std::cout << " | less than 0.001%\n";
         }
         else
         {
@@ -233,7 +233,7 @@ namespace saheki::sort
         // generate intervals for participants
         std::vector<interval<char_type>> intervals;
         {
-            uint32_t _power;
+            uint64_t _power;
             auto temp = 0;
             for(auto it = partipants_ptrs.begin(); it != partipants_ptrs.end(); ++it)
             {   
@@ -251,7 +251,7 @@ namespace saheki::sort
         }
 
         //get max number
-        uint32_t max_number = (*(intervals.end() -1)).end;
+        uint64_t max_number = (*(intervals.end() -1)).end;
         
         //sort intervals by power
         std::sort(intervals.begin(), intervals.end(), 

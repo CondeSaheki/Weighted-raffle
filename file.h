@@ -88,8 +88,7 @@ namespace saheki::file
         std::vector<saheki::sort::partipant<char_type>> partipants;
         
         std::basic_stringstream<char_type> ss;
-        
-        std::vector<uint32_t> preferences;
+        std::vector<uint64_t> preferences;
         int temp;
 
 
