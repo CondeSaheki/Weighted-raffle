@@ -1,4 +1,3 @@
-#include <iostream>
 #include "sort.h"
 #include "file.h"
 
@@ -6,7 +5,6 @@ namespace sfs = std::filesystem;
 
 int main(int argc, char **argv)
 {
- 
     using char_type = char;
     using string_type = std::basic_string<char_type>;
     using namespace saheki;
@@ -33,7 +31,6 @@ int main(int argc, char **argv)
     auto options = file::options_file(options_file_path);
     auto participants = file::forms_file(forms_file_path);
 
-        
     // create references
     std::vector<sort::option<char_type>*> options_ptrs;
     std::vector<sort::partipant<char_type>*> partipants_ptrs;
@@ -56,16 +53,31 @@ int main(int argc, char **argv)
         }
     }
 
+    // gaming loop
     while(true)
     {
+        if(options_ptrs.empty() && partipants_ptrs.empty())
+        {
+            std::cout << "--------------------------------------------\n";
+            std::cout << "all options have been filled and all participants were drawn!\n";
+            sort::print_option(options);
+            break;
+        }
         if(options_ptrs.empty())
         {
-            std::cout << "no avaliable options" << "\n";
+            std::cout << "--------------------------------------------\n";
+            std::cout << "all options have been filled!" << std::endl;
+            sort::print_option(options);
+            std::cout << "--------------------------------------------\n";
+            std::cout << "participants who were unlucky:\n";
+            sort::print_participant(partipants_ptrs);
             break;
         }
         if(partipants_ptrs.empty())
         {
-            std::cout << "no avaliable participants" << "\n";
+            std::cout << "--------------------------------------------\n";
+            std::cout << "all participants were drawn!" << std::endl;
+            sort::print_option(options);
             break;
         }
 
@@ -76,8 +88,9 @@ int main(int argc, char **argv)
 
         std::cout << "--------------------------------------------\n";
         std::cout << "all avaliable participants:\n";
-        sort::print_participant(participants);
+        sort::print_participant(partipants_ptrs);
 
+        // true gamming
         sort::sort(options_ptrs, partipants_ptrs);
     }
     

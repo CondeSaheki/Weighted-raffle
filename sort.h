@@ -1,43 +1,17 @@
 #pragma once
-#include <sstream>
 #include <string>
 #include <vector>
-#include <numbers>
-#include <memory>
-#include <chrono>
-#include <thread>
-#include <math.h>
 #include <algorithm>
+
 #include "io.h"
 #include "random.h"
+#include "math_utils.h"
 
-// static fns
+#define MAKE_QUESTIONS 1
+#define QUESTIONS_CLEAR 1
+#define RE_ROLL 0
 
 static inline const long double e_const = 2.718281828459045235360287471352662498L;
-
-template< size_t num_decimals, typename from > static constexpr from round_near(const from& value) noexcept
-{
-    auto copy = value * powl(10, num_decimals);
-    auto casted = static_cast<size_t>(copy);
-    from decimals(0);
-    if(value >= 0)
-    {
-        decimals = copy - casted;
-        if(decimals >= 0.5)
-        {
-            casted = casted + 1;
-        }
-    }
-    else
-    {
-        decimals = casted - copy;
-        if(decimals <= 0.5)
-        {
-            casted = casted + 1;
-        }
-    }
-    return static_cast<from>(casted) / powl(10, num_decimals);
-}
 
 namespace saheki::sort
 {
@@ -101,11 +75,12 @@ namespace saheki::sort
         constexpr interval() : owner(nullptr), begin(uint32_t()), end(uint32_t()), power(uint32_t()), chance(0.0) {}
         constexpr interval(partipant<elem>* _owner, const uint32_t& _begin, const uint32_t& _end, const uint32_t& _power) : owner(_owner), begin(_begin), end(_end), power(_power), chance(0.0) {}
     };
+    
+        // fns
 
-
-    bool question()
+    void question1()
     {
-        #if 0
+        #if MAKE_QUESTIONS
             using char_type = char;
             std::cout << "--------------------------------------------\n";
             while(true)
@@ -113,28 +88,35 @@ namespace saheki::sort
                 std::cout << "Are you ready ?\n"; 
                 if(io::input<std::basic_string<char_type>, char_type>() == "yes") { break; }
             }
-            #if 0
+        #endif
+    }
+    void question2()
+    {
+        question1();
+        #if MAKE_QUESTIONS
+        #if QUESTIONS_CLEAR
             system("clear");
-            #endif
         #endif
-        return true;
+        #endif
     }
-    
-    bool question2()
+    bool question3()
     {
-        #if 0
+        #if RE_ROLL
             using char_type = char;
+            std::basic_string<char_type> str;
             std::cout << "--------------------------------------------\n";
             while(true)
             {
-                std::cout << "Are you ready ?\n"; 
-                if(io::input<std::basic_string<char_type>, char_type>() == "yes") { break; }
+                std::cout << "participant you want to reroll ?\n";
+                str = io::input<std::basic_string<char_type>, char_type>();
+                if(str == "yes") { return true; }
+                if(str == "no") { return false; }
+                str.clear();
             }
-            //system("clear");
         #endif
-        return true;
+        return false;
     }
-    
+
     //print options
     template<typename _elem> void print_option(const option<_elem>& target)
     {
@@ -206,8 +188,7 @@ namespace saheki::sort
     template<typename _elem> void print_interval(const interval<_elem>& target)
     {
         print_participant(*(target.owner));
-        
-       if( 0.001 > target.chance)
+        if( 0.001 > target.chance)
         {
             std::cout << " | lesser 0.001%\n";
         }
@@ -230,19 +211,18 @@ namespace saheki::sort
             print_interval<_elem>(**it);
         }
     }
-
-        // fns
     
+    // true gaming
     template<typename _elem = char > void sort(std::vector<option<_elem>*>& options_ptrs, std::vector<partipant<_elem>*>& partipants_ptrs)
     {
         using char_type = char;
         using string_type = std::basic_string<char_type>;
         
         // suspense
-        question();
+        question2();
 
         // ramdomize music
-        auto random_option = options_ptrs.at(saheki::random_generator::number(options_ptrs.size()));
+        auto random_option = options_ptrs.at(saheki::random_generator::number(options_ptrs.size() - 1));
 
         //display random music info
         std::cout << "--------------------------------------------\n";
@@ -253,22 +233,20 @@ namespace saheki::sort
         // generate intervals for participants
         std::vector<interval<char_type>> intervals;
         {
-            uint32_t s;
+            uint32_t _power;
             auto temp = 0;
             for(auto it = partipants_ptrs.begin(); it != partipants_ptrs.end(); ++it)
-            {
-                s = round_near<0>(powl(e_const, 16 - ((*(*it)).preferences)[((*random_option).position)])); // need round closer 
+            {   
+                _power = math::round_near<0>(powl(e_const, 16 - ((*(*it)).preferences)[((*random_option).position)])); // need round closer 
                 if(intervals.empty())
                 {
-                    
-                    intervals.emplace_back((*it), temp, s, s);
+                    intervals.emplace_back((*it), temp, _power, _power);
                 }
                 else
                 {
-                    intervals.emplace_back((*it), (*(intervals.end() -1)).end + 1, (*(intervals.end() -1)).end + 1 + s, s);
+                    intervals.emplace_back((*it), (*(intervals.end() -1)).end + 1, (*(intervals.end() -1)).end + 1 + _power, _power);
                 }
-
-                s = 0;
+                _power = 0;
             }
         }
 
@@ -285,13 +263,13 @@ namespace saheki::sort
         auto random_num = saheki::random_generator::number(max_number);
 
         // find lucky number interval and calculate chances
-        auto winer_interval = intervals.end();
+        auto winner_interval = intervals.end();
         for(auto it = intervals.begin(); it != intervals.end(); ++it)
         {
-            (*it).chance = round_near<3>((static_cast<long double>((*it).power * 100) / max_number));
+            (*it).chance = math::round_near<3>((static_cast<long double>((*it).power * 100) / max_number));
             if((*it).begin <= random_num && (*it).end >= random_num)
             {
-                winer_interval = it;
+                winner_interval = it;
             }
         }
         
@@ -301,18 +279,18 @@ namespace saheki::sort
         print_interval(intervals);
 
         // suspense
-        question2();
+        question1();
 
         // print winner
         std::cout << "--------------------------------------------\n";
         std::cout << "Congratulations!!!\n";
-        print_interval(*winer_interval);
+        print_interval(*winner_interval);
         
         // maybe check if participant is ok 
-        if(true) // io::input<char_type, char_type>() == "yes"
+        if(!question3())
         {
             // assing participant to option
-            ((*random_option).partipants).emplace_back((*((*winer_interval).owner)).name);
+            ((*random_option).partipants).emplace_back((*((*winner_interval).owner)).name);
             
             // remove option if full
             if( ((*random_option).partipants).size() >= ((*random_option).max_partipants))
@@ -330,7 +308,7 @@ namespace saheki::sort
             // remove participant from participant list
             for(auto it = partipants_ptrs.begin(); it != partipants_ptrs.end(); ++it)
             {
-                if((*(*it)).name == (*((*winer_interval).owner)).name)
+                if((*(*it)).name == (*((*winner_interval).owner)).name)
                 {
                     partipants_ptrs.erase(it);
                     break;
@@ -339,8 +317,12 @@ namespace saheki::sort
         }
 
         // suspense
-        question();
+        question2();
 
     }
 
 }
+
+#undef MAKE_QUESTIONS
+#undef QUESTIONS_CLEAR
+#undef RE_ROLL
